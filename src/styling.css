@@ -1,0 +1,89 @@
+
+* {
+  box-sizing: border-box;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-kerning: auto;
+  border: 1px solid red;
+
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'Roboto';
+  margin: 0;
+  background-color: peachpuff;
+
+}
+
+#Main-Title { 
+
+  text-align: center;
+  font-size: 2rem;
+  color: peru;
+
+}
+
+
+#Main-Content { 
+
+  display: flex; flex: auto; justify-content: center; align-items: center;
+  width: 100vw; height: 88.5vh;
+
+}
+
+
+#Left-Column { 
+
+  display: grid; 
+  margin-right: auto; border-radius: 1.5%;
+  background-color: peru;
+  width: 15%; height: 97vh; 
+
+}
+
+#LeftColBut-Div {
+
+  display: flex; flex-direction: column; gap: 15%;
+  margin-right: auto; padding: 1.5rem;
+  height: 30vh; width: 5vw;
+  
+}
+
+
+.LeftColButton { 
+
+  background-color: orangered; color: orange; font-weight: bold;
+  height: 6vh; width: 12vw;   margin-right: auto; 
+  border-radius: 28%; border: 3px solid orange; 
+  cursor: cell;
+  
+}
+
+#Projects-Title {
+
+  color: orange; 
+  margin-left: 2rem; margin-bottom: 70vh;
+
+}
+
+
+#RightContent-Title { 
+
+  color: peru;
+  position: fixed;
+  text-align: center; margin-bottom: 80vh; margin-left: 35vw; width: fit-content; 
+
+}
+
+#Right-Content { 
+
+  background-color: peachpuff;
+  width: 70%; height: 100%; 
+  margin-top: 30vh; 
+
+}
