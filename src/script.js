@@ -1,33 +1,33 @@
 import './styling.css'
+const { compareAsc, compareDesc } = require("date-fns")
 
 let RightContent = document.getElementById("Right-Content")
-let RightContentTitle = document.getElementById("RightContent-Title")
+let MyProjectsContent = document.getElementById("MyProjects-Content")
 
 const NewProjectButton = document.querySelector(".LeftColButton.First")
 const NewTaskButton = document.querySelector(".LeftColButton.Second")
 const UpcomingTasksButton = document.querySelector(".LeftColButton.Third")
 
-function createTask(Title,Description,DueDate,Priority,Checklist,id) {
+
+function createTask(Title,Description,DueDate,Project,id) {
 
     return { 
         TaskTitle: Title,
         TaskDescription: Description, 
         TaskDueDate: DueDate, 
-        TaskPriority: Priority, 
-        TaskComplete: Checklist,
+        TaskProject: Project,
         Taskid: id,
      }
 }
 
-function createProject(Title,Description,TaskItems,DueDate,Priority,id) { 
+function createProject(Title,Description,DueDate,id,Tasks) { 
 
     return {
         ProjectTitle : Title,
         ProjectDescription: Description,
-        ProjectItems: TaskItems,
         ProjectDueDate: DueDate, 
-        ProjectPriority : Priority, 
         Projectid: id,
+        ProjectTasks: Tasks,
     }
 }
 
@@ -41,12 +41,6 @@ NewTaskButton.addEventListener("click", ()=> { NewTask() })
 
 const RenderNewTask = function() { 
 
-    RightContentTitle.innerText = ""
-    RightContentTitle.style.color = "blue"
-    RightContentTitle.style.textDecoration = "underline"
-
-    RightContentTitle.innerText = "Create New Task"
-
     RightContent.style.color = "purple"
     RightContent.style.fontSize = "1.2rem"
     RightContent.style.fontWeight = "500"
@@ -54,11 +48,12 @@ const RenderNewTask = function() {
     RightContent.innerHTML = ""
     RightContent.innerHTML = `
 
-    <form action="#" method="post" id="taskForm"> 
+    <h1 style="color:blue;text-decoration:underline"> Create Task </h1> 
+
+    <form action="#" method="post" id="Right-Content"> 
     Task Title: <input type="text" name="tasktitle" id="taskTitle"> <br>
     <br> Task Description: <input type="text" name="taskdescription" id="taskDesc"><br>
     <br> Task Due Date: <input type="date" name="taskdate" id="taskDueDate"><br> 
-    <br> Task Priority: <input type="number" name="taskpriority" id="taskPriority"><br>
     <br> Task Project? (if none then "N/A") <input type="text" name="taskproject" id="taskProject"><br>
     <br><input type="button" value="Submit Task!" id="TaskForm-Button"></form>
     `
@@ -74,7 +69,6 @@ const HandleTaskInput = function() {
     let taskDescrip = document.getElementById("taskDesc").value 
     
     let taskDue = document.getElementById("taskDueDate").value 
-    let taskPriority = document.getElementById("taskPriority").value
 
     let taskProject = document.getElementById("taskProject").value 
 
@@ -84,7 +78,7 @@ const HandleTaskInput = function() {
             (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
  
 
-    let newTask = createTask(taskTitle,taskDescrip,taskDue,taskPriority,taskProject,taskID)
+    let newTask = createTask(taskTitle,taskDescrip,taskDue,taskProject,taskID)
     localStorage.setItem(`task_${taskID}`, JSON.stringify(newTask))
 }
 
@@ -98,12 +92,6 @@ const NewProject = function() {
 
 const RenderNewProject = function() { 
 
-    RightContentTitle.innerText = ""
-    RightContentTitle.style.color = "orangered"
-    RightContentTitle.style.textDecoration = "underline"
-
-    RightContentTitle.innerText = "Create New Project"
-
     RightContent.style.color = "orange"
     RightContent.style.fontSize = "1.2rem"
     RightContent.style.fontWeight = "500"
@@ -113,11 +101,10 @@ const RenderNewProject = function() {
     RightContent.innerHTML = 
     
     `<form id="frm1"> 
+    <h1 style="color:red;text-decoration:underline"> Create New Project </h1>
     Project Title: <input type="text" name="projectTitle" id="projectTitle"> <br>
     <br> Project Description: <input type="text" name="projectdescription" id="projectDesc"><br>
-    <br> Project Tasks (comma seperated): <input type="text" name="projecttasks" id="projectTasks"><br>
     <br> Project Due Date: <input type="date" name="projectduedate" id="projectDue"><br>
-    <br> Project Priority: <input type="number" name="projectpriority" id="projectPriority"><br>
     <br><input type="button" value="Submit Project!" id="ProjectForm-Button"></form>
     `
     document.getElementById("ProjectForm-Button").addEventListener("click", ()=> { HandleProjectInput() })
@@ -128,19 +115,15 @@ const HandleProjectInput = function() {
     let projectTitle = document.getElementById("projectTitle").value 
     let projectDescription = document.getElementById("projectDesc").value
 
-    let projectTasks = document.getElementById("projectTasks").value 
-
     let projectDueDate = document.getElementById("projectDue").value 
-    let projectPriority = document.getElementById("projectPriority").value 
 
     let projectID = (crypto.randomUUID) 
         ? crypto.randomUUID() 
         : ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
             (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
 
-    let newProject = createProject(projectTitle,projectDescription,projectTasks,projectDueDate,projectPriority,projectID)  
+    let newProject = createProject(projectTitle,projectDescription,projectDueDate,projectID)  
     localStorage.setItem(`project_${projectID}`, JSON.stringify(newProject))
-
 }
 
 UpcomingTasksButton.addEventListener("click", ()=> { RenderUpcomingTasks() })
@@ -149,13 +132,6 @@ const RenderUpcomingTasks = function (){
 
     RightContent.innerHTML = ""
     RightContent.style.color = ""
-    
-    RightContentTitle.style.color = ""
-    RightContentTitle.innerText = ""
-
-    RightContentTitle.style.color = "green"
-    RightContentTitle.innerText = "View Upcoming Tasks"
-    RightContentTitle.style.textDecoration = "" 
 
     RightContent.style.fontWeight = "420"
 
@@ -166,13 +142,46 @@ const RenderUpcomingTasks = function (){
     
     if (taskKey.startsWith('task_')) {
         let taskData = JSON.parse(localStorage.getItem(taskKey))
+        UpcomingTasksArr.push(taskData)
+    }}
 
-        UpcomingTasksArr.push(`<h1>${taskData.TaskTitle}</h1> <p>Description: ${taskData.TaskDescription}</p> 
-            <p>Due Date: ${taskData.TaskDueDate}</p> <p>Priority: ${taskData.TaskPriority}</p>`)
+    const sortedUpcomingTasksArr = UpcomingTasksArr.sort((a,b) => { 
+        return compareAsc(new Date(a.TaskDueDate), new Date(b.TaskDueDate))
+    })
+
+     let tasksHtml = sortedUpcomingTasksArr.map(task => {
+        return ` <div style="margin-bottom: 10px; padding: 5px;">
+                <strong>${task.TaskTitle}</strong><br>
+                Due: ${task.TaskDueDate}
+                <br> Description: ${task.TaskDescription}
+            </div>`}).join("")
+
+    RightContent.innerHTML = ` <h1 style="color:green;">View Upcoming Tasks</h1>
+        <div> ${tasksHtml} </div>`
+}
+
+const RenderProjectsSidebar = function () {
+
+    MyProjectsContent.style.height = "fit-content"
+
+    for (let i = 0; i < localStorage.length; i++) { 
+    let projectKey = localStorage.key(i)
+    
+    if (projectKey.startsWith('project_')) {
+        
+        let projectData = JSON.parse(localStorage.getItem(projectKey))
+
+        MyProjectsContent.innerHTML += `<h1>${projectData.ProjectTitle}</h1>`
+
+        let ProjectViewerObject = projectData 
 
     }
+   }
+}()
 
-    RightContent.innerHTML = UpcomingTasksArr 
+const ProjectViewer = function () { 
 
-  }
+
+
+
 }

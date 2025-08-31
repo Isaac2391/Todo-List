@@ -29,7 +29,7 @@ body {
 
 #Main-Content { 
 
-  display: flex; flex: auto; justify-content: center; align-items: center;
+  display: flex; justify-content: center; align-items: center;
   width: 100vw; height: 88.5vh;
 
 }
@@ -38,16 +38,16 @@ body {
 #Left-Column { 
 
   display: grid; 
-  margin-right: auto; border-radius: 1.5%;
+  margin-right: auto; border-radius: 1.5%; margin-top: 18vh;
   background-color: peru;
-  width: 15%; height: 97vh; 
+  width: 16%; height: auto; 
 
 }
 
 #LeftColBut-Div {
 
   display: flex; flex-direction: column; gap: 15%;
-  margin-right: auto; padding: 1.5rem;
+  margin-right: auto; margin-left: 0.7vw; padding: 1.5rem;
   height: 30vh; width: 5vw;
   
 }
@@ -65,23 +65,22 @@ body {
 #Projects-Title {
 
   color: orange; 
-  margin-left: 2rem; margin-bottom: 70vh;
+  margin-left: 6rem; margin-bottom: 70vh;
 
 }
 
+#MyProjects-Content {
 
-#RightContent-Title { 
-
-  color: peru;
-  position: fixed;
-  text-align: center; margin-bottom: 80vh; margin-left: 35vw; width: fit-content; 
+  color: orangered; background-color: orange;
+  width: 12vw; height: 50vh; margin-top: -68vh; margin-left: 2vw; border-radius: 18%;
+  text-align: center;
 
 }
+
 
 #Right-Content { 
 
   background-color: peachpuff;
-  width: 70%; height: 100%; 
-  margin-top: 30vh; 
+  width: 30vw; height: 100%; 
 
 }
