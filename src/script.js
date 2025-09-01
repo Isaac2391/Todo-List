@@ -42,7 +42,6 @@ const RenderNewTask = function() {
 
     RightContent.style = ""
 
-
     RightContent.style.color = "purple"
     RightContent.style.fontSize = "1.2rem"
     RightContent.style.fontWeight = "500"
@@ -66,12 +65,12 @@ const RenderNewTask = function() {
 
 const HandleTaskInput = function() { 
 
-    let taskTitle = document.getElementById("taskTitle").value 
-    let taskDescrip = document.getElementById("taskDesc").value 
+    let taskTitle = document.getElementById("taskTitle").value || "?"
+    let taskDescrip = document.getElementById("taskDesc").value || "?"
     
-    let taskDue = document.getElementById("taskDueDate").value 
+    let taskDue = document.getElementById("taskDueDate").value || "?"
 
-    let taskProject = document.getElementById("taskProject").value 
+    let taskProject = document.getElementById("taskProject").value || "?"
 
         let taskID = (crypto.randomUUID) 
         ? crypto.randomUUID() 
@@ -115,10 +114,10 @@ const NewProject = function() {
 
 const HandleProjectInput = function() { 
 
-    let projectTitle = document.getElementById("projectTitle").value 
-    let projectDescription = document.getElementById("projectDesc").value
+    let projectTitle = document.getElementById("projectTitle").value || "?"
+    let projectDescription = document.getElementById("projectDesc").value || "?"
 
-    let projectDueDate = document.getElementById("projectDue").value 
+    let projectDueDate = document.getElementById("projectDue").value || "?"
 
     let projectID = (crypto.randomUUID) 
         ? crypto.randomUUID() 
@@ -181,35 +180,43 @@ const TaskDeleteFunction = function(key) {
 
 const RenderProjectsSidebar = function () {
 
-    let divDeletionId = 0
-
     MyProjectsContent.innerHTML = ""
 
     MyProjectsContent.style.height = "fit-content"
 
     for (let i = 0; i < localStorage.length; i++) { 
+
     let projectKey = localStorage.key(i)
     
     if (projectKey.startsWith('project_')) {
         
         let projectData = JSON.parse(localStorage.getItem(projectKey))
 
-        MyProjectsContent.innerHTML += `<div style="display:flex; gap: 5%;" id="${divDeletionId}"> 
-        <h1 id="ProjectButton" style="cursor:cell;">${projectData.ProjectTitle || "?"}</h1> 
-        <button style="background-color:red; padding: 10%; border-radius: 25%; height: 1vh; width: 1vw;" id="ProjectsDeleter"> X </button>
-        </div>`
-
-        let ProjectDeleteButton = document.getElementById("ProjectsDeleter")
-        ProjectDeleteButton.addEventListener("click", ()=>{ ProjectDelete(projectKey)})
-
-        let ProjectViewButton = document.getElementById("ProjectButton")
-        ProjectViewButton.addEventListener("click", ()=> { ProjectView(projectData)})
+        MyProjectsContent.innerHTML += `<div style="display:flex; gap: 5%;"> 
+<h1 style="cursor:cell;" class="project-view-btn" data-project='${JSON.stringify(projectData)}'>${projectData.ProjectTitle}</h1>
+<button style="background-color:red; padding: 10%; border-radius: 25%; height: 1vh; width: 1vw;" class="projects-deleter" data-key="${projectKey}"> X </button>        </div>`
   }
  }
+
+    document.querySelectorAll(".projects-deleter").forEach(ProjectDeleteButton=> {
+    ProjectDeleteButton.addEventListener("click", ()=> { 
+            
+    const key = ProjectDeleteButton.getAttribute("data-key")
+    ProjectDelete(key)})})
+        
+  document.querySelectorAll(".project-view-btn").forEach(button => {
+        button.addEventListener("click", () => { 
+            const projectData = JSON.parse(button.getAttribute("data-project"))
+            ProjectView(projectData)
+        })
+    })
+
 }
 
-const ProjectDelete = function (Key) { 
-    localStorage.removeItem(Key)
+RenderProjectsSidebar() 
+
+const ProjectDelete = function (ID) {
+    localStorage.removeItem(ID)
     location.reload()
 }
 
@@ -230,9 +237,10 @@ const ProjectView = function(ProjectObject) {
 
     RightContent.innerHTML = 
     
-    `<h2> ${ProjectObject.ProjectTitle || "?"} </h2><br>
-     <p>Description: ${ProjectObject.ProjectDescription || "?"} </p><br>
-     <p>Due Date: ${ProjectObject.ProjectDueDate || "?"} </p><br>
-     <p> Project Tasks: ${ProjectObject.ProjectTask || "?"} </p>`
+    `<h2> ${ProjectObject.ProjectTitle} </h2><br>
+     <p>Description: ${ProjectObject.ProjectDescription} </p><br>
+     <p>Due Date: ${ProjectObject.ProjectDueDate} </p><br>
+     <p> Project Tasks: ${ProjectObject.ProjectTask} </p>`
+
 
 }
