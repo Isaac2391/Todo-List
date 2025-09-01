@@ -1,5 +1,5 @@
 import './styling.css'
-const { compareAsc, compareDesc } = require("date-fns")
+const { compareAsc } = require("date-fns")
 
 let RightContent = document.getElementById("Right-Content")
 let MyProjectsContent = document.getElementById("MyProjects-Content")
@@ -7,7 +7,6 @@ let MyProjectsContent = document.getElementById("MyProjects-Content")
 const NewProjectButton = document.querySelector(".LeftColButton.First")
 const NewTaskButton = document.querySelector(".LeftColButton.Second")
 const UpcomingTasksButton = document.querySelector(".LeftColButton.Third")
-
 
 function createTask(Title,Description,DueDate,Project,id) {
 
@@ -41,6 +40,9 @@ NewTaskButton.addEventListener("click", ()=> { NewTask() })
 
 const RenderNewTask = function() { 
 
+    RightContent.style = ""
+
+
     RightContent.style.color = "purple"
     RightContent.style.fontSize = "1.2rem"
     RightContent.style.fontWeight = "500"
@@ -54,12 +56,11 @@ const RenderNewTask = function() {
     Task Title: <input type="text" name="tasktitle" id="taskTitle"> <br>
     <br> Task Description: <input type="text" name="taskdescription" id="taskDesc"><br>
     <br> Task Due Date: <input type="date" name="taskdate" id="taskDueDate"><br> 
-    <br> Task Project? (if none then "N/A") <input type="text" name="taskproject" id="taskProject"><br>
+    <br> Task Project? <input type="text" name="taskproject" id="taskProject"><br>
     <br><input type="button" value="Submit Task!" id="TaskForm-Button"></form>
     `
 
     document.getElementById("TaskForm-Button").addEventListener("click", ()=>{ HandleTaskInput() })
-
 
 }
 
@@ -90,7 +91,9 @@ const NewProject = function() {
 
 }
 
-const RenderNewProject = function() { 
+    const RenderNewProject = function() {
+
+    RightContent.style = ""
 
     RightContent.style.color = "orange"
     RightContent.style.fontSize = "1.2rem"
@@ -107,7 +110,7 @@ const RenderNewProject = function() {
     <br> Project Due Date: <input type="date" name="projectduedate" id="projectDue"><br>
     <br><input type="button" value="Submit Project!" id="ProjectForm-Button"></form>
     `
-    document.getElementById("ProjectForm-Button").addEventListener("click", ()=> { HandleProjectInput() })
+    document.getElementById("ProjectForm-Button").addEventListener("click", ()=> { HandleProjectInput(), RenderProjectsSidebar() })
 }
 
 const HandleProjectInput = function() { 
@@ -131,7 +134,7 @@ UpcomingTasksButton.addEventListener("click", ()=> { RenderUpcomingTasks() })
 const RenderUpcomingTasks = function (){ 
 
     RightContent.innerHTML = ""
-    RightContent.style.color = ""
+    RightContent.style = ""
 
     RightContent.style.fontWeight = "420"
 
@@ -142,7 +145,7 @@ const RenderUpcomingTasks = function (){
     
     if (taskKey.startsWith('task_')) {
         let taskData = JSON.parse(localStorage.getItem(taskKey))
-        UpcomingTasksArr.push(taskData)
+        UpcomingTasksArr.push({...taskData,taskKey})
     }}
 
     const sortedUpcomingTasksArr = UpcomingTasksArr.sort((a,b) => { 
@@ -151,16 +154,36 @@ const RenderUpcomingTasks = function (){
 
      let tasksHtml = sortedUpcomingTasksArr.map(task => {
         return ` <div style="margin-bottom: 10px; padding: 5px;">
-                <strong>${task.TaskTitle}</strong><br>
-                Due: ${task.TaskDueDate}
-                <br> Description: ${task.TaskDescription}
-            </div>`}).join("")
+                <strong> Title: ${task.TaskTitle || "?"}</strong> 
+                <button style="background-color:red; padding: 3px; border-radius: 25%; height: 0.2vh; width: 0.2vw;" class="task-deleter" data-key="${task.taskKey}"> X </button><br>
+                Due: ${task.TaskDueDate || "?"}
+                <br> Description: ${task.TaskDescription || "?"}
+            </div> 
+        `
+            }).join("")
 
     RightContent.innerHTML = ` <h1 style="color:green;">View Upcoming Tasks</h1>
         <div> ${tasksHtml} </div>`
+
+ document.querySelectorAll(".task-deleter").forEach(TaskDeleteButton=> {
+        TaskDeleteButton.addEventListener("click", ()=> { 
+            
+        const key = TaskDeleteButton.getAttribute("data-key")
+        TaskDeleteFunction(key)})
+ })
+
+}
+
+const TaskDeleteFunction = function(key) { 
+    localStorage.removeItem(key)
+    location.reload()
 }
 
 const RenderProjectsSidebar = function () {
+
+    let divDeletionId = 0
+
+    MyProjectsContent.innerHTML = ""
 
     MyProjectsContent.style.height = "fit-content"
 
@@ -171,17 +194,45 @@ const RenderProjectsSidebar = function () {
         
         let projectData = JSON.parse(localStorage.getItem(projectKey))
 
-        MyProjectsContent.innerHTML += `<h1>${projectData.ProjectTitle}</h1>`
+        MyProjectsContent.innerHTML += `<div style="display:flex; gap: 5%;" id="${divDeletionId}"> 
+        <h1 id="ProjectButton" style="cursor:cell;">${projectData.ProjectTitle || "?"}</h1> 
+        <button style="background-color:red; padding: 10%; border-radius: 25%; height: 1vh; width: 1vw;" id="ProjectsDeleter"> X </button>
+        </div>`
 
-        let ProjectViewerObject = projectData 
+        let ProjectDeleteButton = document.getElementById("ProjectsDeleter")
+        ProjectDeleteButton.addEventListener("click", ()=>{ ProjectDelete(projectKey)})
 
-    }
-   }
-}()
+        let ProjectViewButton = document.getElementById("ProjectButton")
+        ProjectViewButton.addEventListener("click", ()=> { ProjectView(projectData)})
+  }
+ }
+}
 
-const ProjectViewer = function () { 
+const ProjectDelete = function (Key) { 
+    localStorage.removeItem(Key)
+    location.reload()
+}
 
+const ProjectView = function(ProjectObject) { 
 
+    RightContent.innerHTML = ""
 
+    RightContent.style.fontWeight = "450"
+    RightContent.style.textAlign = "center"
+
+    RightContent.style.backgroundColor = "orange"
+    RightContent.style.color = "palegoldenrod"
+    RightContent.style.boxShadow = "10px 10px 20px black"
+    RightContent.style.height = "auto"
+    RightContent.style.marginBottom = "auto"
+
+    RightContent.style.borderRadius = "15%"
+
+    RightContent.innerHTML = 
+    
+    `<h2> ${ProjectObject.ProjectTitle || "?"} </h2><br>
+     <p>Description: ${ProjectObject.ProjectDescription || "?"} </p><br>
+     <p>Due Date: ${ProjectObject.ProjectDueDate || "?"} </p><br>
+     <p> Project Tasks: ${ProjectObject.ProjectTask || "?"} </p>`
 
 }

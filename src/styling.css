@@ -29,7 +29,7 @@ body {
 
 #Main-Content { 
 
-  display: flex; justify-content: center; align-items: center;
+  display: flex; justify-content: start; align-items: center; gap: 5vw;
   width: 100vw; height: 88.5vh;
 
 }
@@ -38,9 +38,9 @@ body {
 #Left-Column { 
 
   display: grid; 
-  margin-right: auto; border-radius: 1.5%; margin-top: 18vh;
-  background-color: peru;
-  width: 16%; height: auto; 
+  border-radius: 1.5%; margin-top: 3vh; 
+  background-color: peru; 
+  width: 20%; height: auto; 
 
 }
 
@@ -56,7 +56,7 @@ body {
 .LeftColButton { 
 
   background-color: orangered; color: orange; font-weight: bold;
-  height: 6vh; width: 12vw;   margin-right: auto; 
+  height: 6vh; width: 12vw; margin-right: auto; 
   border-radius: 28%; border: 3px solid orange; 
   cursor: cell;
   
@@ -65,14 +65,15 @@ body {
 #Projects-Title {
 
   color: orange; 
-  margin-left: 6rem; margin-bottom: 70vh;
+  margin-left: 5rem; margin-bottom: 70vh;
 
 }
 
 #MyProjects-Content {
 
-  color: orangered; background-color: orange;
-  width: 12vw; height: 50vh; margin-top: -68vh; margin-left: 2vw; border-radius: 18%;
+  display: flex; flex-direction: column; gap: 20%;
+  color: orangered; background-color: orange; font-size: 0.6rem;
+  width: 16vw; height: fit-content; margin-top: -68vh; margin-left: 2vw; border-radius: 18%;
   text-align: center;
 
 }
@@ -81,6 +82,7 @@ body {
 #Right-Content { 
 
   background-color: peachpuff;
-  width: 30vw; height: 100%; 
+  width: auto; height: 100%; 
+  margin-left: 25vw;
 
 }
