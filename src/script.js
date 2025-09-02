@@ -49,13 +49,12 @@ const RenderNewTask = function() {
     RightContent.innerHTML = ""
     RightContent.innerHTML = `
 
+    <form action="#" method="post" id="frm1"> 
     <h1 style="color:blue;text-decoration:underline"> Create Task </h1> 
-
-    <form action="#" method="post" id="Right-Content"> 
     Task Title: <input type="text" name="tasktitle" id="taskTitle"> <br>
     <br> Task Description: <input type="text" name="taskdescription" id="taskDesc"><br>
     <br> Task Due Date: <input type="date" name="taskdate" id="taskDueDate"><br> 
-    <br> Task Project? <input type="text" name="taskproject" id="taskProject"><br>
+    <br> Task Project? ( leave blank if none ) <input type="text" name="taskproject" id="taskProject"><br>
     <br><input type="button" value="Submit Task!" id="TaskForm-Button"></form>
     `
 
@@ -67,19 +66,36 @@ const HandleTaskInput = function() {
 
     let taskTitle = document.getElementById("taskTitle").value || "?"
     let taskDescrip = document.getElementById("taskDesc").value || "?"
-    
     let taskDue = document.getElementById("taskDueDate").value || "?"
 
-    let taskProject = document.getElementById("taskProject").value || "?"
-
-        let taskID = (crypto.randomUUID) 
+    let taskID = (crypto.randomUUID) 
         ? crypto.randomUUID() 
         : ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
             (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
- 
 
-    let newTask = createTask(taskTitle,taskDescrip,taskDue,taskProject,taskID)
+    // Pass both project name and taskID
+    let taskProject = AddTaskToProject(document.getElementById("taskProject").value, taskID)
+
+    let newTask = createTask(taskTitle,taskDescrip,taskDue,taskProject || "",taskID)
     localStorage.setItem(`task_${taskID}`, JSON.stringify(newTask))
+}
+
+const AddTaskToProject = function (taskProjectInputVal, taskID) { 
+    if (taskProjectInputVal === "") { return "" }
+
+    for (let i = 0; i < localStorage.length; i++) { 
+        let projectKey = localStorage.key(i)
+        if (projectKey.startsWith('project_')) {
+            let projectData = JSON.parse(localStorage.getItem(projectKey))
+            if (String(projectData.ProjectTitle) === String(taskProjectInputVal)) {
+                // Add the new task's ID to the ProjectTasks array
+                projectData.ProjectTasks.push(taskID)
+                localStorage.setItem(projectKey, JSON.stringify(projectData))
+                return taskProjectInputVal 
+            }
+        }
+    }
+    return "" 
 }
 
 NewProjectButton.addEventListener("click", ()=> { NewProject() })
@@ -124,7 +140,9 @@ const HandleProjectInput = function() {
         : ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
             (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
 
-    let newProject = createProject(projectTitle,projectDescription,projectDueDate,projectID)  
+    let projectTasks = [] 
+
+    let newProject = createProject(projectTitle,projectDescription,projectDueDate,projectID,projectTasks)  
     localStorage.setItem(`project_${projectID}`, JSON.stringify(newProject))
 }
 
@@ -153,11 +171,12 @@ const RenderUpcomingTasks = function (){
 
      let tasksHtml = sortedUpcomingTasksArr.map(task => {
         return ` <div style="margin-bottom: 10px; padding: 5px;">
-                <strong> Title: ${task.TaskTitle || "?"}</strong> 
-                <button style="background-color:red; padding: 3px; border-radius: 25%; height: 0.2vh; width: 0.2vw;" class="task-deleter" data-key="${task.taskKey}"> X </button><br>
-                Due: ${task.TaskDueDate || "?"}
-                <br> Description: ${task.TaskDescription || "?"}
-            </div> 
+        <strong> Title: ${task.TaskTitle || "?"}</strong> 
+        <button style="background-color:red; padding: 3px; border-radius: 25%; height: 0.2vh; width: 0.2vw;" class="task-deleter"
+        data-key="${task.taskKey}"> X </button><br>
+        Due: ${task.TaskDueDate || "?"}
+        <br> Description: ${task.TaskDescription || "?"}
+        </div> 
         `
             }).join("")
 
@@ -190,11 +209,13 @@ const RenderProjectsSidebar = function () {
     
     if (projectKey.startsWith('project_')) {
         
-        let projectData = JSON.parse(localStorage.getItem(projectKey))
+    let projectData = JSON.parse(localStorage.getItem(projectKey))
 
-        MyProjectsContent.innerHTML += `<div style="display:flex; gap: 5%;"> 
-<h1 style="cursor:cell;" class="project-view-btn" data-project='${JSON.stringify(projectData)}'>${projectData.ProjectTitle}</h1>
-<button style="background-color:red; padding: 10%; border-radius: 25%; height: 1vh; width: 1vw;" class="projects-deleter" data-key="${projectKey}"> X </button>        </div>`
+    MyProjectsContent.innerHTML += `<div style="display:flex; gap: 5%;"> 
+    <h1 style="cursor:cell;" class="project-view-btn" data-project='${JSON.stringify(projectData)}'>${projectData.ProjectTitle}</h1>
+    <button style="background-color:red; padding: 10%; border-radius: 25%; height: 1vh; width: 1vw;"
+    class="projects-deleter" data-key="${projectKey}"> X </button> 
+    </div>`
   }
  }
 
@@ -202,7 +223,9 @@ const RenderProjectsSidebar = function () {
     ProjectDeleteButton.addEventListener("click", ()=> { 
             
     const key = ProjectDeleteButton.getAttribute("data-key")
-    ProjectDelete(key)})})
+    ProjectDelete(key)
+ })
+})
         
   document.querySelectorAll(".project-view-btn").forEach(button => {
         button.addEventListener("click", () => { 
@@ -215,8 +238,8 @@ const RenderProjectsSidebar = function () {
 
 RenderProjectsSidebar() 
 
-const ProjectDelete = function (ID) {
-    localStorage.removeItem(ID)
+const ProjectDelete = function (Key) {
+    localStorage.removeItem(Key)
     location.reload()
 }
 
@@ -236,11 +259,19 @@ const ProjectView = function(ProjectObject) {
     RightContent.style.borderRadius = "15%"
 
     RightContent.innerHTML = 
-    
-    `<h2> ${ProjectObject.ProjectTitle} </h2><br>
-     <p>Description: ${ProjectObject.ProjectDescription} </p><br>
-     <p>Due Date: ${ProjectObject.ProjectDueDate} </p><br>
-     <p> Project Tasks: ${ProjectObject.ProjectTask} </p>`
-
-
-}
+`
+<h2> ${ProjectObject.ProjectTitle} </h2><br>
+<p>Description: ${ProjectObject.ProjectDescription} </p><br>
+<p>Due Date: ${ProjectObject.ProjectDueDate} </p><br>
+<p> Project Tasks: 
+    ${
+        (ProjectObject.ProjectTasks && ProjectObject.ProjectTasks.length > 0)
+        ? ProjectObject.ProjectTasks.map(taskID => {
+            const task = JSON.parse(localStorage.getItem(`task_${taskID}`));
+            return task ? `<div>- ${task.TaskTitle}, ${task.TaskDueDate}</div>` : "";
+        }).join("")
+        : "None"
+    }
+</p>
+`
+ }
