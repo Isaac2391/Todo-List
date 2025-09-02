@@ -73,7 +73,6 @@ const HandleTaskInput = function() {
         : ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
             (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
 
-    // Pass both project name and taskID
     let taskProject = AddTaskToProject(document.getElementById("taskProject").value, taskID)
 
     let newTask = createTask(taskTitle,taskDescrip,taskDue,taskProject || "",taskID)
@@ -85,10 +84,12 @@ const AddTaskToProject = function (taskProjectInputVal, taskID) {
 
     for (let i = 0; i < localStorage.length; i++) { 
         let projectKey = localStorage.key(i)
+
         if (projectKey.startsWith('project_')) {
+
             let projectData = JSON.parse(localStorage.getItem(projectKey))
             if (String(projectData.ProjectTitle) === String(taskProjectInputVal)) {
-                // Add the new task's ID to the ProjectTasks array
+
                 projectData.ProjectTasks.push(taskID)
                 localStorage.setItem(projectKey, JSON.stringify(projectData))
                 return taskProjectInputVal 
@@ -172,7 +173,7 @@ const RenderUpcomingTasks = function (){
      let tasksHtml = sortedUpcomingTasksArr.map(task => {
         return ` <div style="margin-bottom: 10px; padding: 5px;">
         <strong> Title: ${task.TaskTitle || "?"}</strong> 
-        <button style="background-color:red; padding: 3px; border-radius: 25%; height: 0.2vh; width: 0.2vw;" class="task-deleter"
+        <button style="background-color:red; padding: 5px; border-radius: 25%;" class="task-deleter"
         data-key="${task.taskKey}"> X </button><br>
         Due: ${task.TaskDueDate || "?"}
         <br> Description: ${task.TaskDescription || "?"}
@@ -213,7 +214,7 @@ const RenderProjectsSidebar = function () {
 
     MyProjectsContent.innerHTML += `<div style="display:flex; gap: 5%;"> 
     <h1 style="cursor:cell;" class="project-view-btn" data-project='${JSON.stringify(projectData)}'>${projectData.ProjectTitle}</h1>
-    <button style="background-color:red; padding: 10%; border-radius: 25%; height: 1vh; width: 1vw;"
+    <button style="background-color:red; padding: 4.5%; border-radius: 25%; height: 1vh; width: 1vw;"
     class="projects-deleter" data-key="${projectKey}"> X </button> 
     </div>`
   }
@@ -251,24 +252,25 @@ const ProjectView = function(ProjectObject) {
     RightContent.style.textAlign = "center"
 
     RightContent.style.backgroundColor = "orange"
-    RightContent.style.color = "palegoldenrod"
+    RightContent.style.color = "orangered"
     RightContent.style.boxShadow = "10px 10px 20px black"
     RightContent.style.height = "auto"
     RightContent.style.marginBottom = "auto"
 
     RightContent.style.borderRadius = "15%"
+    RightContent.style.padding = "0.5%"
 
     RightContent.innerHTML = 
 `
 <h2> ${ProjectObject.ProjectTitle} </h2><br>
-<p>Description: ${ProjectObject.ProjectDescription} </p><br>
-<p>Due Date: ${ProjectObject.ProjectDueDate} </p><br>
-<p> Project Tasks: 
-    ${
+<strong><p>Description: ${ProjectObject.ProjectDescription} </p></strong><br>
+<strong><p>Due Date: ${ProjectObject.ProjectDueDate} </p></strong><br>
+<p> Project Tasks: </p>
+    <p>${
         (ProjectObject.ProjectTasks && ProjectObject.ProjectTasks.length > 0)
         ? ProjectObject.ProjectTasks.map(taskID => {
             const task = JSON.parse(localStorage.getItem(`task_${taskID}`));
-            return task ? `<div>- ${task.TaskTitle}, ${task.TaskDueDate}</div>` : "";
+            return task ? `<div> ${task.TaskTitle} <br>${task.TaskDueDate}</div><br>` : "";
         }).join("")
         : "None"
     }
